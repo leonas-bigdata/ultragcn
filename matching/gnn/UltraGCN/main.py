@@ -43,6 +43,7 @@ import configparser
 import time
 import argparse
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 
 def data_param_prepare(config_file):
@@ -108,8 +109,8 @@ def data_param_prepare(config_file):
 
     # dataset processing
     train_data, test_data, train_mat, user_num, item_num, constraint_mat = load_data(train_file_path, test_file_path)
-    train_loader = data.DataLoader(train_data, batch_size=batch_size, shuffle = True, num_workers=5)
-    test_loader = data.DataLoader(list(range(user_num)), batch_size=test_batch_size, shuffle=False, num_workers=5)
+    train_loader = data.DataLoader(train_data, batch_size=batch_size, shuffle = True, num_workers=2)
+    test_loader = data.DataLoader(list(range(user_num)), batch_size=test_batch_size, shuffle=False, num_workers=2)
 
     params['user_num'] = user_num
     params['item_num'] = item_num
@@ -289,9 +290,14 @@ class UltraGCN(nn.Module):
         self.user_embeds = nn.Embedding(self.user_num, self.embedding_dim)
         self.item_embeds = nn.Embedding(self.item_num, self.embedding_dim)
 
-        self.constraint_mat = constraint_mat
-        self.ii_constraint_mat = ii_constraint_mat
-        self.ii_neighbor_mat = ii_neighbor_mat
+        # FIX: Move matrices to the correct device immediately
+        device = params['device']
+        self.constraint_mat = {
+            'beta_uD': constraint_mat['beta_uD'].to(device),
+            'beta_iD': constraint_mat['beta_iD'].to(device)
+        }
+        self.ii_constraint_mat = ii_constraint_mat.to(device)
+        self.ii_neighbor_mat = ii_neighbor_mat.to(device)
 
         self.initial_weight = params['initial_weight']
         self.initial_weights()
@@ -301,20 +307,18 @@ class UltraGCN(nn.Module):
         nn.init.normal_(self.item_embeds.weight, std=self.initial_weight)
 
     def get_omegas(self, users, pos_items, neg_items):
-        device = self.get_device()
         if self.w2 > 0:
-            pos_weight = torch.mul(self.constraint_mat['beta_uD'][users], self.constraint_mat['beta_iD'][pos_items]).to(device)
+            # These lookups will now work because self.constraint_mat is on the same device as 'users'
+            pos_weight = torch.mul(self.constraint_mat['beta_uD'][users], self.constraint_mat['beta_iD'][pos_items])
             pos_weight = self.w1 + self.w2 * pos_weight
         else:
             pos_weight = self.w1 * torch.ones(len(pos_items)).to(device)
         
-        # users = (users * self.item_num).unsqueeze(0)
         if self.w4 > 0:
-            neg_weight = torch.mul(torch.repeat_interleave(self.constraint_mat['beta_uD'][users], neg_items.size(1)), self.constraint_mat['beta_iD'][neg_items.flatten()]).to(device)
+            neg_weight = torch.mul(torch.repeat_interleave(self.constraint_mat['beta_uD'][users], neg_items.size(1)), self.constraint_mat['beta_iD'][neg_items.flatten()])
             neg_weight = self.w3 + self.w4 * neg_weight
         else:
             neg_weight = self.w3 * torch.ones(neg_items.size(0) * neg_items.size(1)).to(device)
-
 
         weight = torch.cat((pos_weight, neg_weight))
         return weight
@@ -395,6 +399,8 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
         model.train() 
         start_time = time.time()
 
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         for batch, x in enumerate(train_loader): # x: tensor:[users, pos_items]
             users, pos_items, neg_items = Sampling(x, params['item_num'], params['negative_num'], interacted_items, params['sampling_sift_pos'])
             users = users.to(device)
@@ -407,6 +413,15 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
                 writer.add_scalar("Loss/train_batch", loss, batches * epoch + batch)
             loss.backward()
             optimizer.step()
+
+        train_time_seconds = time.time() - start_time
+        train_time_str = time.strftime("%H:%M:%S", time.gmtime(train_time_seconds))
+        
+        gpu_stats = ""
+        if torch.cuda.is_available():
+            mem_alloc = torch.cuda.memory_allocated(device) / 1024**2
+            mem_res = torch.cuda.memory_reserved(device) / 1024**2
+            gpu_stats = f" | GPU Mem: {mem_alloc:.0f}MB / {mem_res:.0f}MB"
         
         train_time = time.strftime("%H: %M: %S", time.gmtime(time.time() - start_time))
         if params['enable_tensorboard']:
@@ -425,6 +440,7 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
             test_time = time.strftime("%H: %M: %S", time.gmtime(time.time() - start_time))
             
             print('The time for epoch {} is: train time = {}, test time = {}'.format(epoch, train_time, test_time))
+            print('GPU stats: {}'.format(gpu_stats))
             print("Loss = {:.5f}, F1-score: {:5f} \t Precision: {:.5f}\t Recall: {:.5f}\tNDCG: {:.5f}".format(loss.item(), F1_score, Precision, Recall, NDCG))
 
             if Recall > best_recall:
@@ -544,7 +560,7 @@ def test(model, test_loader, test_ground_truth_list, mask, topk, n_user):
             batch_users = batch_users.to(model.get_device())
             rating = model.test_foward(batch_users) 
             rating = rating.cpu()
-            rating += mask[batch_users]
+            rating += mask[batch_users.cpu()]
             
             _, rating_K = torch.topk(rating, k=topk)
             rating_list.append(rating_K)
