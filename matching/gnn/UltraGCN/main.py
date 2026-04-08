@@ -43,7 +43,7 @@ import configparser
 import time
 import argparse
 from torch.utils.tensorboard import SummaryWriter
-from datetime import datetime
+import psutil
 
 
 def data_param_prepare(config_file):
@@ -387,6 +387,8 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
     early_stop_count = 0
     early_stop = False
 
+    total_start_time = time.time()
+
     batches = len(train_loader.dataset) // params['batch_size']
     if len(train_loader.dataset) % params['batch_size'] != 0:
         batches += 1
@@ -398,8 +400,6 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
     for epoch in range(params['max_epoch']):
         model.train() 
         start_time = time.time()
-
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         for batch, x in enumerate(train_loader): # x: tensor:[users, pos_items]
             users, pos_items, neg_items = Sampling(x, params['item_num'], params['negative_num'], interacted_items, params['sampling_sift_pos'])
@@ -413,17 +413,17 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
                 writer.add_scalar("Loss/train_batch", loss, batches * epoch + batch)
             loss.backward()
             optimizer.step()
+        
+        ram = psutil.virtual_memory().used / 1024**2
+        cpu = psutil.cpu_percent()
 
-        train_time_seconds = time.time() - start_time
-        train_time_str = time.strftime("%H:%M:%S", time.gmtime(train_time_seconds))
-        
-        gpu_stats = ""
+        gpu_mem = 0
         if torch.cuda.is_available():
-            mem_alloc = torch.cuda.memory_allocated(device) / 1024**2
-            mem_res = torch.cuda.memory_reserved(device) / 1024**2
-            gpu_stats = f" | GPU Mem: {mem_alloc:.0f}MB / {mem_res:.0f}MB"
+            gpu_mem = torch.cuda.memory_allocated(device) / 1024**2
+
+        epoch_time = time.time() - start_time
         
-        train_time = time.strftime("%H: %M: %S", time.gmtime(time.time() - start_time))
+        # train_time = time.strftime("%H: %M: %S", time.gmtime(time.time() - start_time))
         if params['enable_tensorboard']:
             writer.add_scalar("Loss/train_epoch", loss, epoch)
 
@@ -432,16 +432,21 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
             need_test = False
             
         if need_test:
-            start_time = time.time()
+            # start_time = time.time()
             F1_score, Precision, Recall, NDCG = test(model, test_loader, test_ground_truth_list, mask, params['topk'], params['user_num'])
             if params['enable_tensorboard']:
                 writer.add_scalar('Results/recall@20', Recall, epoch)
                 writer.add_scalar('Results/ndcg@20', NDCG, epoch)
-            test_time = time.strftime("%H: %M: %S", time.gmtime(time.time() - start_time))
+            # test_time = time.strftime("%H: %M: %S", time.gmtime(time.time() - start_time))
             
-            print('The time for epoch {} is: train time = {}, test time = {}'.format(epoch, train_time, test_time))
-            print('GPU stats: {}'.format(gpu_stats))
-            print("Loss = {:.5f}, F1-score: {:5f} \t Precision: {:.5f}\t Recall: {:.5f}\tNDCG: {:.5f}".format(loss.item(), F1_score, Precision, Recall, NDCG))
+            # print('The time for epoch {} is: train time = {}, test time = {}'.format(epoch, train_time, test_time))
+            # print("Loss = {:.5f}, F1-score: {:5f} \t Precision: {:.5f}\t Recall: {:.5f}\tNDCG: {:.5f}".format(loss.item(), F1_score, Precision, Recall, NDCG))
+            print(
+                f"EPOCH[{epoch}/{params['max_epoch']}] "
+                f"loss:{loss.item():.3f} | "
+                f"F1:{F1_score:.4f} | P:{Precision:.4f} | R:{Recall:.4f} | NDCG:{NDCG:.4f} | "
+                f"T:{epoch_time:.2f}s | RAM:{ram:.1f}MB | CPU:{cpu:.1f}% | VRAM:{gpu_mem:.1f}MB"
+            )
 
             if Recall > best_recall:
                 best_recall, best_ndcg, best_epoch = Recall, NDCG, epoch
@@ -463,7 +468,8 @@ def train(model, optimizer, train_loader, test_loader, mask, test_ground_truth_l
 
     writer.flush()
 
-    print('Training end!')
+    total_time = time.time() - total_start_time
+    print(f"\nTraining finished. Total time: {time.strftime('%H:%M:%S', time.gmtime(total_time))}")
 
 
 ########################### TESTING #####################################
