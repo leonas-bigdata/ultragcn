@@ -1,43 +1,108 @@
-# RecZoo
+# UltraGCN
 
-RecZoo: A curated model zoo for recommendation tasks
+This repository is part of **RecZoo**, a curated model zoo for recommendation tasks.  
+In this fork, **our team focuses exclusively on implementing and experimenting with UltraGCN**.
+
+> **CIKM 2021** — Kelong Mao, Jieming Zhu, Xi Xiao, Biao Lu, Zhaowei Wang, Xiuqiang He.  
+> **UltraGCN: Ultra Simplification of Graph Convolutional Networks for Recommendation**  
+> Paper: https://arxiv.org/pdf/2110.15114.pdf
+
+- Original UltraGCN implementation: https://github.com/RecZoo/UltraGCN
+
+---
+
+## 📌 Overview
+
+**UltraGCN** is an advanced simplification of Graph Convolutional Networks for recommendation.  
+Instead of performing explicit graph convolutions, UltraGCN **reformulates the message passing mechanism into a constraint-based loss**, significantly improving:
+
+- Training efficiency
+- Scalability to large datasets
+- Recommendation performance
+
+This makes UltraGCN highly suitable for large-scale collaborative filtering tasks.
+
+Our fork focuses on:
+
+- Clean and reproducible experiments
+- Structured experiment tracking
+- Running and validating experiments on Google Colab
+- Understanding UltraGCN behavior across datasets
+
+Although RecZoo contains many recommendation models across matching, ranking, pretraining, and personalization tasks, **this repository only implements and evaluates:**
+
+| No | Model     | Publication |
+|:--:|-----------|-------------|
+| 1  | **UltraGCN** | Kelong Mao et al., *UltraGCN: Ultra Simplification of Graph Convolutional Networks for Recommendation*, CIKM 2021 |
+
+---
+
+## 📂 Supported Datasets
+
+This implementation supports four widely used benchmark datasets and one custom dataset prepared by our team:
+
+| Dataset       | Description                                  |
+|---------------|----------------------------------------------|
+| **Gowalla**   | Location-based social network check-ins      |
+| **Yelp2018**  | Business reviews and user ratings            |
+| **Amazon-Book** | Book purchase and rating records          |
+| **MovieLens1M** | Movie rating dataset                      |
+| **GitStar**   | Self-crawled dataset based on GitHub stars  |
 
 
-## Matching
+---
 
-| No  | Model                                    | Publication                                                                                                                                                                                                                                       
-|:---:|:----------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| 1   |  [UltraGCN](./matching/gnn/UltraGCN)               | Kelong Mao, Jieming Zhu, Xi Xiao, Biao Lu, Zhaowei Wang, Xiuqiang He. [UltraGCN: Ultra Simplification of Graph Convolutional Networks for Recommendation](https://arxiv.org/pdf/2110.15114.pdf), in CIKM 2021.                                                              
-| 2   |  [SimpleX](./matching/cf/SimpleX)                  | Kelong Mao, Jieming Zhu, Jinpeng Wang, Quanyu Dai, Zhenhua Dong, Xi Xiao, Xiuqiang He. [SimpleX: A Simple and Strong Baseline for Collaborative Filtering](https://arxiv.org/abs/2109.12613), in CIKM 2021.                                                                                    
+## 🧪 Experiments
 
+We conducted careful experiments using the PyTorch version of UltraGCN.  
+All experimental runs, logs, and metric tracking are stored in the `exp/` directory as Jupyter notebooks.
 
-## Ranking
+To ensure transparency and academic integrity, we provide public Google Drive links containing:
 
-| No  | Model                                    | Publication                                                                                                                                                                                                                                       
-|:---:|:----------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| 1   |  [FinalMLP](./ranking/ctr/FinalMLP)               | Kelong Mao, Jieming Zhu, Liangcai Su, Guohao Cai, Yuru Li, Zhenhua Dong. [FinalMLP: An Enhanced Two-Stream MLP Model for CTR Prediction](https://arxiv.org/abs/2304.00902), in AAAI 2023.                                                              
-| 2   |  [FinalNet](./ranking/ctr/FinalNet)                  | Jieming Zhu, Qinglin Jia, Guohao Cai, Quanyu Dai, Jingjie Li, Zhenhua Dong, Ruiming Tang, Rui Zhang. [FINAL: Factorized Interaction Layer for CTR Prediction](https://dl.acm.org/doi/10.1145/3539618.3591988), in SIGIR 2023.    
-| 3   |  [RAT](https://github.com/YushenLi807/WWW24-RAT)                  | Yushen Li, Jinpeng Wang, Tao Dai, Jieming Zhu, Jun Yuan, Rui Zhang, Shu-Tao Xia. [RAT: Retrieval-Augmented Transformer for Click-Through Rate Prediction](https://arxiv.org/abs/2404.02249), in WWW 2024.  
-| 4   |  [STEM](https://github.com/LiangcaiSu/STEM)                  | Liangcai Su, Junwei Pan, Ximei Wang, Xi Xiao, Shijie Quan, Xihua Chen, Jie Jiang. [STEM: Unleashing the Power of Embeddings for Multi-task Recommendation](https://arxiv.org/abs/2308.13537), in AAAI 2024.  
-| 5   |  [Helen](https://github.com/NUS-HPC-AI-Lab/Helen)                  | Zirui Zhu, Yong Liu, Zangwei Zheng, Huifeng Guo, Yang You. [Helen: Optimizing CTR Prediction Models with Frequency-wise Hessian Eigenvalue Regularization](https://arxiv.org/abs/2403.00798), in WWW 2024.  
-| 6   |  [Combined-Pair](https://github.com/SkylerLinn/Understanding-the-Ranking-Loss)                  | Zhutian Lin, Junwei Pan, Shangyu Zhang, Ximei Wang, Xi Xiao, Shudong Huang, Lei Xiao, Jie Jiang. [Understanding the Ranking Loss for Recommendation with Sparse User Feedback](https://arxiv.org/abs/2403.14144), in KDD 2024.  
-| 7   |  [AdaGIN](https://github.com/salmon1802/AdaGIN)                  | Lei Sang, Honghao Li, Yiwen Zhang, Yi Zhang, Yun Yang. [AdaGIN: Adaptive Graph Interaction Network for Click-Through Rate Prediction](https://dl.acm.org/doi/10.1145/3681785), in TOIS 2024.  
-| 8   |  [SimCEN](https://github.com/salmon1802/SimCEN)                  | Honghao Li, Lei Sang, Yi Zhang, Yiwen Zhang. [SimCEN: Simple Contrast-enhanced Network for CTR Prediction](https://openreview.net/forum?id=pJHu4hDlLX&referrer=%5Bthe%20profile%20of%20Yiwen%20Zhang%5D(%2Fprofile%3Fid%3D~Yiwen_Zhang3)), in MM 2024.  
-| 9  |  [RecSys](https://github.com/doubleQ2018/recsys-challenge-2024)                  | Qi Zhang, Jieming Zhu, Jiansheng Sun, Guohao Cai, Ruining Yu, Bangzheng He, Liangbi Li. [Enhancing News Recommendation with Real-Time Feedback and Generative Sequence Modeling](), in RecSys Challenge Workshop 2024.  
-| 10   |  [DCNv3](https://github.com/salmon1802/DCNv3)                  | Honghao Li, Yiwen Zhang, Yi Zhang, Hanwei Li, Lei Sang, Jieming Zhu. [DCNv3: Towards Next Generation Deep Cross Network for CTR Prediction](https://arxiv.org/abs/2407.13349), in Arxiv 2024.  
+- The source code from this repository that we uploaded on Google Drive to mount for experiment running
+- Execution logs
+- Output results
+- Saved checkpoints and metrics
 
+These materials serve as **self-proof** that all experiments were conducted by our team on **Google Colab**, without reusing results from external sources. Accessing each link will lead to a folder with three folder LightGCN, UltraGCN and LayerGCN. The source code for this repository is uploaded inside the UltraGCN folder for all three links
 
-## Reranking
+**Note: The souce in the UltraGCN folder inside each drive link is upload from the `matching/gnn/UltraGCN` path of this repository**
 
+### Environment
 
-## Pretraining
+- Google Colab (GPU)
+- PyTorch implementation
+- Multiple reruns to verify consistency
 
-| No  | Model                                    | Publication                                                                                                                                                                                                                                       
-|:---:|:----------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| 1   |  [UNBERT](./pretraining/news/UNBERT)               | Qi Zhang, Jingjie Li, Qinglin Jia, Chuyuan Wang, Jieming Zhu, Zhaowei Wang, Xiuqiang He. [UNBERT: User-News Matching BERT for News Recommendation](https://www.ijcai.org/proceedings/2021/462), in IJCAI 2021.
+### Experiment Notebooks
 
+| Notebook             | Description                        | Link |
+|----------------------|------------------------------------|------|
+| `lightgcn_exp`       | Initial experimental run           | https://drive.google.com/drive/folders/1Iq_NvTZkTy8MYP-0DPvymDHFO2nDsFK_?usp=drive_link |
+| `lightgcn_rerun_1`   | Run the second time        | https://drive.google.com/drive/folders/1l93GDNQzRcL9pg4eR6vriTOxrzcUY_G5?usp=drive_link |
+| `lightgcn_rerun_2`   | Run the third time | https://drive.google.com/drive/folders/12VtE9kucBlikg8x8cVtrnuwBRTTBC68d?usp=drive_link |
 
-## Personalization
-| No  | Model                                    | Publication                                                                                                                                                                                                                                       
-|:---:|:----------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| 1   |  [PMG](https://github.com/Suikasxt/PMG)               | Xiaoteng Shen, Rui Zhang, Xiaoyan Zhao, Jieming Zhu, Xi Xiao. [PMG: Personalized Multimodal Generation with Large Language Models](https://arxiv.org/abs/2404.08677), in WWW 2024.
+These notebooks contain:
+
+- Training configurations
+- Evaluation metrics (Recall, NDCG, etc.)
+- Result comparisons across runs
+
+---
+
+## 🎯 Purpose of This Fork
+
+This fork was created for:
+
+- Academic experimentation with UltraGCN
+- Reproducible research
+- Understanding constraint-based graph learning for recommendation
+- Structured documentation of experimental results
+
+---
+
+## 🙏 Acknowledgements
+
+We sincerely thank the authors of UltraGCN and the RecZoo project for making their work publicly available.
+
+If you use this codebase, please consider citing the original paper.
