@@ -64,13 +64,13 @@ To ensure transparency and academic integrity, we provide public Google Drive li
 - Output results
 - Saved checkpoints and metrics
 
-These materials serve as **self-proof** that all experiments were conducted by our team on **Google Colab**, without reusing results from external sources. Accessing each link will lead to a folder with three folder LightGCN, UltraGCN and LayerGCN. The source code for this repository is uploaded inside the UltraGCN folder for all three links
+These materials serve as **self-proof** that all experiments were conducted by our team on **Google Colab** * **Kaggle**, without reusing results from external sources. Accessing each link will lead to a folder with three folder LightGCN, UltraGCN and LayerGCN. The source code for this repository is uploaded inside the UltraGCN folder for all three links
 
 **Note: The souce in the UltraGCN folder inside each drive link is upload from the `matching/gnn/UltraGCN` path of this repository**
 
 ### Environment
 
-- Google Colab (GPU)
+- Google Colab (GPU) + Kaggle
 - PyTorch implementation
 - Multiple reruns to verify consistency
 
@@ -78,9 +78,10 @@ These materials serve as **self-proof** that all experiments were conducted by o
 
 | Notebook             | Description                        | Link |
 |----------------------|------------------------------------|------|
-| `ultra_exp`       | Initial experimental run           | https://drive.google.com/drive/folders/1Iq_NvTZkTy8MYP-0DPvymDHFO2nDsFK_?usp=drive_link |
-| `ultra_rerun_1`   | Run the second time        | https://drive.google.com/drive/folders/1l93GDNQzRcL9pg4eR6vriTOxrzcUY_G5?usp=drive_link |
-| `ultra_rerun_2`   | Run the third time | https://drive.google.com/drive/folders/12VtE9kucBlikg8x8cVtrnuwBRTTBC68d?usp=drive_link |
+| `ultra_exp`       | Run amazonbook 2 times and gitstar 1 time           | https://drive.google.com/drive/folders/1Iq_NvTZkTy8MYP-0DPvymDHFO2nDsFK_?usp=drive_link |
+| `ultra_rerun_1`   | Run Gowalla 1 time, GitStar 1 time        | https://drive.google.com/drive/folders/1l93GDNQzRcL9pg4eR6vriTOxrzcUY_G5?usp=drive_link |
+| `ultra_rerun_2`   | Run AmazonBook 1 time and GitStar 1 time | https://drive.google.com/drive/folders/12VtE9kucBlikg8x8cVtrnuwBRTTBC68d?usp=drive_link |
+| `ultragcn`   | Run yelp2018 3 times along with gowalla 2 times | None |
 
 These notebooks contain:
 
