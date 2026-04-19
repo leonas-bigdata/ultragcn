@@ -37,6 +37,28 @@ Although RecZoo contains many recommendation models across matching, ranking, pr
 
 ---
 
+## 📦 Important Task 3 Experiments & Visualize folders
+
+- `exp` folder store our experiments notebooks file
+
+- `plot` folder store our visualization and extracted copied logs from the notebooks files
+
+---
+
+## 🛠️ Key Modifications in This Fork
+
+- Change the `matching/gnn/UltraGCN/main.py` file
+
+    - We set the  num worker to 2 instead of 5 `train_loader = data.DataLoader(train_data, batch_size=batch_size, shuffle = True, num_workers=2)` since keeping the original value make the training process go to the freezing state and untrainable
+
+- Address device handling fix inside the UltraGCN init 
+
+    - The original model stores constraint_mat, ii_constraint_mat,  ii_neighbor_mat as they are. These tensors stay on the CPU by default.
+
+    - For the new version, before storing them, we move these values to correct devices with `.to(device)`
+
+---
+
 ## 📂 Supported Datasets
 
 This implementation supports four widely used benchmark datasets and one custom dataset prepared by our team:
